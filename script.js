@@ -80,19 +80,28 @@ function renderHome() {
                 </div>
             </div>
             
-            <!-- FOOTER -->
-            <div class="footer">
-                <p>© 2025 <strong>Nihongo Quiz</strong> | Created by <strong>Juun4</strong></p>
-                <p>🌐 <a href="https://www.juun4.cloud" target="_blank">www.juun4.cloud</a></p>
-                <a href="https://wa.me/6285727631507?text=Halo%2C%20saya%20mau%20request%20soal%20Kanji%20N2" 
-                   class="whatsapp-btn" 
-                   target="_blank">
-                   💬 Request Kanji N2
-                </a>
+            <!-- SIMPLE FOOTER -->
+            <div class="simple-footer">
+                <p>© 2025 <a href="https://www.juun4.cloud" target="_blank">Nihongo Quiz</a> | Created by <a href="https://www.juun4.cloud" target="_blank">Juun4</a></p>
             </div>
         </div>
     `;
 
+    // Floating WhatsApp button (ditaruh di luar container biar fixed)
+    const floatContainer = document.getElementById('floatWaContainer');
+    if (floatContainer) {
+        floatContainer.innerHTML = `
+            <div class="float-wa">
+                <a href="https://wa.me/6285727631507?text=Halo%2C%20saya%20mau%20request%20soal%20bahasa%20Jepang" 
+                   class="whatsapp-float" 
+                   target="_blank">
+                   💬 Request Soal
+                </a>
+            </div>
+        `;
+    }
+
+    // Event listeners
     document.querySelectorAll('.mode-card[data-mode]').forEach(card => {
         const mode = card.getAttribute('data-mode');
         if (mode === 'katabenda' || mode === 'kanjin5') return;
@@ -118,6 +127,10 @@ function renderHome() {
 
 // ==================== START QUIZ ====================
 async function startQuiz(mode, subMode) {
+    // Sembunyikan floating button selama quiz
+    const floatContainer = document.getElementById('floatWaContainer');
+    if (floatContainer) floatContainer.innerHTML = '';
+    
     currentMode = mode;
     currentSubMode = subMode;
     currentIndex = 0;
@@ -149,7 +162,9 @@ async function startQuiz(mode, subMode) {
                 </div>
             </div>
         `;
-        document.getElementById('backHome')?.addEventListener('click', renderHome);
+        document.getElementById('backHome')?.addEventListener('click', () => {
+            renderHome();
+        });
     }
 }
 
@@ -238,9 +253,9 @@ function getModeDisplayName(mode, subMode) {
     if (mode === 'hiragana') return 'HIRAGANA';
     if (mode === 'katakana') return 'KATAKANA';
     if (mode === 'katabenda') {
-        if (subMode === 'arti') return 'KOTOKA · Tebak Arti';
-        if (subMode === 'baca') return 'KOTOKA · Tebak Baca';
-        return 'KOTOKA · Tebak Jepang';
+        if (subMode === 'arti') return 'KOTOBENDA · Tebak Arti';
+        if (subMode === 'baca') return 'KOTOBENDA · Tebak Baca';
+        return 'KOTOBENDA · Tebak Jepang';
     }
     if (mode === 'kanjin5') {
         if (subMode === 'arti') return 'KANJI N5 · Tebak Arti';
@@ -348,7 +363,9 @@ function renderQuiz() {
         renderQuiz();
     });
     
-    document.getElementById('backHomeBtn')?.addEventListener('click', renderHome);
+    document.getElementById('backHomeBtn')?.addEventListener('click', () => {
+        renderHome();
+    });
     document.getElementById('nextBtn')?.addEventListener('click', () => {
         currentIndex++;
         answered = false;
@@ -389,7 +406,9 @@ function renderResult() {
         currentOptionsLocked = [];
         renderQuiz();
     });
-    document.getElementById('homeBtn')?.addEventListener('click', renderHome);
+    document.getElementById('homeBtn')?.addEventListener('click', () => {
+        renderHome();
+    });
 }
 
 function escapeHtml(str) {
