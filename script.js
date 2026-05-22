@@ -40,7 +40,7 @@ function renderHome() {
         <div class="container">
             <h1 class="home-title">
                 <span class="japan-flag"></span>
-                NIHONGO QUIZ
+                NIHON GO QUIZ
                 <span class="japan-flag"></span>
             </h1>
             <p class="home-sub">pilih mode belajar</p>
