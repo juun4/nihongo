@@ -5,18 +5,22 @@ const DATA_URLS = {
     kotoba: 'https://raw.githubusercontent.com/juun4/Database/master/nihongo/katabenda.json'
 };
 
-// State global
+const SOAL_PER_SESI = 20;
+const POIN_PER_SOAL = 5;
+const SKOR_MAX = 100;
+
 let currentMode = null;
-let quizData = [];
-let shuffledQuestions = [];
+let currentSubMode = null; // untuk kotoba: 'arti', 'baca', 'jepang'
+let fullData = [];
+let sessionQuestions = [];
 let currentIndex = 0;
 let score = 0;
 let answered = false;
 let selectedAnswer = null;
 let currentOptions = [];
-let currentCorrectAnswer = '';
+let currentCorrectAnswer = null;
 
-// ==================== HELPER FUNCTIONS ====================
+// ==================== UTILS ====================
 function shuffleArray(arr) {
     const newArr = [...arr];
     for (let i = newArr.length - 1; i > 0; i--) {
@@ -26,86 +30,163 @@ function shuffleArray(arr) {
     return newArr;
 }
 
-function generateOptions(question, allData) {
-    const correct = question.jawaban;
-    const others = allData.filter(item => item.jawaban !== correct).map(item => item.jawaban);
-    const shuffledOthers = shuffleArray([...others]);
-    const wrongOptions = shuffledOthers.slice(0, 3);
-    let options = [correct, ...wrongOptions];
-    return shuffleArray(options);
+function getRandomItems(arr, count) {
+    const shuffled = shuffleArray([...arr]);
+    return shuffled.slice(0, count);
 }
 
-// ==================== RENDER FUNCTIONS ====================
+// ==================== RENDER HOME ====================
 function renderHome() {
     const app = document.getElementById('app');
     app.innerHTML = `
-        <div class="container home-menu">
-            <h1 class="title">🇯🇵 NIHONGO QUIZ</h1>
-            <p class="subtitle">pilih mode belajar</p>
-            <div class="mode-buttons">
-                <button class="mode-btn" data-mode="hiragana">🍡 Hiragana</button>
-                <button class="mode-btn" data-mode="katakana">🗡️ Katakana</button>
-                <button class="mode-btn" data-mode="kotoba">📖 Kotoba</button>
+        <div class="container">
+            <h1 class="home-title">🇯🇵 NIHONGO QUIZ</h1>
+            <p class="home-sub">pilih mode belajar</p>
+            
+            <div class="mode-row">
+                <div class="mode-card" data-mode="hiragana">
+                    <div class="mode-icon">🍡</div>
+                    <div class="mode-title">Hiragana</div>
+                    <div class="mode-desc">Tebak romaji dari huruf Hiragana</div>
+                </div>
+                <div class="mode-card" data-mode="katakana">
+                    <div class="mode-icon">🗡️</div>
+                    <div class="mode-title">Katakana</div>
+                    <div class="mode-desc">Tebak romaji dari huruf Katakana</div>
+                </div>
+            </div>
+            
+            <div class="mode-card" id="kotobaCard">
+                <div class="mode-icon">📖</div>
+                <div class="mode-title">Kotoba</div>
+                <div class="mode-desc">Kosakata bahasa Jepang</div>
+                <div class="kotoba-menu" id="kotobaMenu">
+                    <button class="kotoba-sub-btn" data-sub="arti">🇮🇩 Tebak Arti</button>
+                    <button class="kotoba-sub-btn" data-sub="baca">🔊 Tebak Cara Baca</button>
+                    <button class="kotoba-sub-btn" data-sub="jepang">🇯🇵 Tebak Jepang</button>
+                </div>
             </div>
         </div>
     `;
 
-    document.querySelectorAll('.mode-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const mode = btn.getAttribute('data-mode');
-            loadQuiz(mode);
+    document.querySelectorAll('.mode-card[data-mode]').forEach(card => {
+        card.addEventListener('click', (e) => {
+            if (e.target.closest('.kotoba-sub-btn')) return;
+            const mode = card.getAttribute('data-mode');
+            startQuiz(mode, null);
+        });
+    });
+
+    document.querySelectorAll('.kotoba-sub-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const subMode = btn.getAttribute('data-sub');
+            startQuiz('kotoba', subMode);
         });
     });
 }
 
-async function loadQuiz(mode) {
+// ==================== START QUIZ ====================
+async function startQuiz(mode, subMode) {
     currentMode = mode;
+    currentSubMode = subMode;
     currentIndex = 0;
     score = 0;
     answered = false;
     
     const app = document.getElementById('app');
     app.innerHTML = `<div class="container loading">⏳ Memuat data ${mode}...</div>`;
-
+    
     try {
         const response = await fetch(DATA_URLS[mode]);
-        if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
         
-        if (!Array.isArray(data) || data.length === 0) {
-            throw new Error('Data kosong atau format salah');
-        }
+        if (!Array.isArray(data) || data.length === 0) throw new Error('Data kosong');
         
-        console.log(`✅ Loaded ${data.length} questions for ${mode}`);
-        quizData = data;
-        shuffledQuestions = shuffleArray(data);
+        fullData = data;
+        
+        // Ambil 20 soal acak
+        sessionQuestions = getRandomItems(fullData, SOAL_PER_SESI);
+        
         renderQuiz();
     } catch (error) {
-        console.error('Fetch error:', error);
+        console.error(error);
         app.innerHTML = `
             <div class="container">
-                <div class="quiz-card error">
-                    <h3>⚠️ Gagal memuat data</h3>
-                    <p>Error: ${error.message}</p>
-                    <p style="font-size: 0.8rem; margin: 1rem 0;">Pastikan file JSON tersedia di GitHub</p>
-                    <button class="next-btn back-btn" id="backHomeBtn">← Kembali</button>
+                <div class="quiz-container" style="text-align:center">
+                    <h3 style="color:#f87171">⚠️ Gagal memuat data</h3>
+                    <p>${error.message}</p>
+                    <button class="next-btn back-home" id="backHome">← Kembali</button>
                 </div>
             </div>
         `;
-        document.getElementById('backHomeBtn')?.addEventListener('click', renderHome);
+        document.getElementById('backHome')?.addEventListener('click', renderHome);
     }
 }
 
+// ==================== GENERATE OPTIONS ====================
+function generateOptionsForQuestion(question, allData, mode, subMode) {
+    let correctAnswer;
+    let allPossibleAnswers = [];
+    
+    if (mode === 'hiragana' || mode === 'katakana') {
+        correctAnswer = question.jawaban;
+        allPossibleAnswers = allData.map(q => q.jawaban);
+    } else if (mode === 'kotoba') {
+        if (subMode === 'arti') {
+            correctAnswer = question.arti;
+            allPossibleAnswers = allData.map(q => q.arti);
+        } else if (subMode === 'baca') {
+            correctAnswer = question.cara_baca;
+            allPossibleAnswers = allData.map(q => q.cara_baca);
+        } else if (subMode === 'jepang') {
+            correctAnswer = question.soal;
+            allPossibleAnswers = allData.map(q => q.soal);
+        }
+    }
+    
+    // Filter jawaban berbeda
+    const otherAnswers = [...new Set(allPossibleAnswers.filter(a => a !== correctAnswer))];
+    const shuffledOthers = shuffleArray(otherAnswers);
+    const wrongOptions = shuffledOthers.slice(0, 3);
+    let options = [correctAnswer, ...wrongOptions];
+    return shuffleArray(options);
+}
+
+function getQuestionText(question, mode, subMode) {
+    if (mode === 'hiragana' || mode === 'katakana') {
+        return { main: question.soal, sub: 'Tebak romaji:' };
+    } else if (mode === 'kotoba') {
+        if (subMode === 'arti') {
+            return { main: question.soal, sub: 'Arti dalam Bahasa Indonesia?' };
+        } else if (subMode === 'baca') {
+            return { main: question.soal, sub: 'Cara baca (romaji)?' };
+        } else {
+            return { main: question.arti, sub: 'Bahasa Jepangnya?' };
+        }
+    }
+    return { main: '?', sub: '' };
+}
+
+function getCorrectAnswerValue(question, mode, subMode) {
+    if (mode === 'hiragana' || mode === 'katakana') return question.jawaban;
+    if (subMode === 'arti') return question.arti;
+    if (subMode === 'baca') return question.cara_baca;
+    return question.soal;
+}
+
+// ==================== RENDER QUIZ ====================
 function renderQuiz() {
-    if (currentIndex >= shuffledQuestions.length) {
+    if (currentIndex >= sessionQuestions.length) {
         renderResult();
         return;
     }
-
-    const question = shuffledQuestions[currentIndex];
-    currentCorrectAnswer = question.jawaban;
-    currentOptions = generateOptions(question, shuffledQuestions);
+    
+    const question = sessionQuestions[currentIndex];
+    currentCorrectAnswer = getCorrectAnswerValue(question, currentMode, currentSubMode);
+    currentOptions = generateOptionsForQuestion(question, fullData, currentMode, currentSubMode);
+    const { main, sub } = getQuestionText(question, currentMode, currentSubMode);
     
     let optionsHtml = '';
     const letters = ['A', 'B', 'C', 'D'];
@@ -117,44 +198,51 @@ function renderQuiz() {
             else if (selectedAnswer === opt && opt !== currentCorrectAnswer) statusClass = 'wrong';
         }
         optionsHtml += `
-            <button class="option-btn ${statusClass}" data-answer="${opt}" ${answered ? 'disabled' : ''}>
-                <span class="prefix">${letters[idx]}</span> ${opt}
+            <button class="option-btn ${statusClass}" data-answer="${escapeHtml(opt)}" ${answered ? 'disabled' : ''}>
+                <span class="option-prefix">${letters[idx]}</span>
+                <span>${escapeHtml(opt)}</span>
             </button>
         `;
     });
-
+    
     let feedbackHtml = '';
     if (answered) {
         const isCorrect = selectedAnswer === currentCorrectAnswer;
+        const earnedPoints = isCorrect ? POIN_PER_SOAL : 0;
         feedbackHtml = `
             <div class="feedback" style="background: ${isCorrect ? '#14532d' : '#7f1d1d'}">
-                ${isCorrect ? '✅ Benar!' : `❌ Salah! Jawaban benar: ${currentCorrectAnswer}`}
+                ${isCorrect ? `✅ Benar! +${POIN_PER_SOAL} poin` : `❌ Salah! Jawaban benar: ${currentCorrectAnswer}`}
             </div>
         `;
     }
-
+    
+    const currentScore = score;
+    const maxScoreSoal = sessionQuestions.length * POIN_PER_SOAL;
+    
     const app = document.getElementById('app');
     app.innerHTML = `
         <div class="container">
-            <div class="quiz-card">
+            <div class="quiz-container">
                 <div class="quiz-header">
-                    <span>📖 ${currentMode.toUpperCase()}</span>
-                    <span>🎯 Skor: ${score}</span>
-                    <span>📋 ${currentIndex+1}/${shuffledQuestions.length}</span>
+                    <span class="badge-mode">${currentMode.toUpperCase()} ${currentSubMode ? `(${getSubModeName(currentSubMode)})` : ''}</span>
+                    <span>🎯 ${currentScore}/${maxScoreSoal}</span>
+                    <span>📋 ${currentIndex+1}/${sessionQuestions.length}</span>
                 </div>
-                <div class="question">${escapeHtml(question.soal)}</div>
+                <div class="question-box">
+                    <div class="question-jp">${escapeHtml(main)}</div>
+                    <div class="question-sub">${sub}</div>
+                </div>
                 <div class="options" id="optionsContainer">
                     ${optionsHtml}
                 </div>
                 ${feedbackHtml}
-                ${answered ? `<button class="next-btn" id="nextBtn">${currentIndex+1 === shuffledQuestions.length ? '🏁 Selesai' : '→ Soal Berikutnya'}</button>` : ''}
-                <button class="next-btn reset-btn" id="resetQuizBtn">🔄 Reset Quiz</button>
-                <button class="next-btn back-btn" id="backToHomeBtn">← Ganti Mode</button>
+                ${answered ? `<button class="next-btn" id="nextBtn">${currentIndex+1 === sessionQuestions.length ? '🏁 Lihat Hasil' : '→ Soal Berikutnya'}</button>` : ''}
+                <button class="next-btn secondary-btn" id="resetQuizBtn">🔄 Reset Quiz (Soal Baru)</button>
+                <button class="next-btn back-home" id="backHomeBtn">← Ganti Mode</button>
             </div>
         </div>
     `;
-
-    // Event listeners
+    
     if (!answered) {
         document.querySelectorAll('.option-btn').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -164,7 +252,7 @@ function renderQuiz() {
                 answered = true;
                 
                 if (answer === currentCorrectAnswer) {
-                    score++;
+                    score += POIN_PER_SOAL;
                 }
                 renderQuiz();
             });
@@ -172,14 +260,14 @@ function renderQuiz() {
     }
     
     document.getElementById('resetQuizBtn')?.addEventListener('click', () => {
-        shuffledQuestions = shuffleArray(quizData);
+        sessionQuestions = getRandomItems(fullData, SOAL_PER_SESI);
         currentIndex = 0;
         score = 0;
         answered = false;
         renderQuiz();
     });
     
-    document.getElementById('backToHomeBtn')?.addEventListener('click', renderHome);
+    document.getElementById('backHomeBtn')?.addEventListener('click', renderHome);
     document.getElementById('nextBtn')?.addEventListener('click', () => {
         currentIndex++;
         answered = false;
@@ -187,20 +275,39 @@ function renderQuiz() {
     });
 }
 
+function getSubModeName(subMode) {
+    if (subMode === 'arti') return 'Tebak Arti';
+    if (subMode === 'baca') return 'Tebak Cara Baca';
+    return 'Tebak Jepang';
+}
+
 function renderResult() {
+    const maxScore = sessionQuestions.length * POIN_PER_SOAL;
+    const percentage = (score / maxScore) * 100;
+    let message = '';
+    if (percentage >= 80) message = '🎉 Hebat! Penguasaanmu luar biasa!';
+    else if (percentage >= 60) message = '👍 Bagus! Terus belajar ya!';
+    else if (percentage >= 40) message = '📚 Lumayan, tapi perlu lebih banyak latihan.';
+    else message = '💪 Jangan menyerah! Coba lagi!';
+    
     const app = document.getElementById('app');
     app.innerHTML = `
         <div class="container">
-            <div class="quiz-card" style="text-align: center;">
-                <h2>✨ Hasil Quiz ${currentMode} ✨</h2>
-                <p style="font-size: 2.5rem; margin: 2rem; font-weight: bold;">${score} / ${shuffledQuestions.length}</p>
-                <button class="next-btn" id="restartBtn">🔄 Kerjakan Ulang</button>
-                <button class="next-btn back-btn" id="homeBtn">← Pilih Mode Lain</button>
+            <div class="quiz-container result-box">
+                <h2>✨ Hasil Quiz ✨</h2>
+                <div class="result-score">${score} / ${maxScore}</div>
+                <p style="font-size:1.2rem">${Math.round(percentage)}%</p>
+                <p style="margin:16px 0">${message}</p>
+                <div class="btn-group">
+                    <button class="next-btn" id="retryBtn">🔄 Coba Lagi (Soal Baru)</button>
+                    <button class="next-btn secondary-btn" id="homeBtn">← Pilih Mode Lain</button>
+                </div>
             </div>
         </div>
     `;
-    document.getElementById('restartBtn')?.addEventListener('click', () => {
-        shuffledQuestions = shuffleArray(quizData);
+    
+    document.getElementById('retryBtn')?.addEventListener('click', () => {
+        sessionQuestions = getRandomItems(fullData, SOAL_PER_SESI);
         currentIndex = 0;
         score = 0;
         answered = false;
@@ -210,7 +317,8 @@ function renderResult() {
 }
 
 function escapeHtml(str) {
-    return str.replace(/[&<>]/g, function(m) {
+    if (!str) return '';
+    return String(str).replace(/[&<>]/g, function(m) {
         if (m === '&') return '&amp;';
         if (m === '<') return '&lt;';
         if (m === '>') return '&gt;';
@@ -218,5 +326,5 @@ function escapeHtml(str) {
     });
 }
 
-// ==================== START APP ====================
+// ==================== START ====================
 renderHome();
