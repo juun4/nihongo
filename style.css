@@ -18,7 +18,6 @@ body {
     margin: 0 auto;
 }
 
-/* ========== HOME PAGE ========== */
 .home-title {
     text-align: center;
     font-size: 2.5rem;
@@ -121,7 +120,6 @@ body {
     color: #0f1724;
 }
 
-/* ========== QUIZ PAGE ========== */
 .quiz-container {
     background: rgba(15, 23, 42, 0.8);
     backdrop-filter: blur(12px);
@@ -286,7 +284,6 @@ body {
     margin-top: 24px;
 }
 
-/* ========== FOOTER ========== */
 .simple-footer {
     text-align: center;
     margin-top: 48px;
@@ -307,7 +304,6 @@ body {
     text-decoration: underline;
 }
 
-/* ========== FLOATING WHATSAPP BUTTON ========== */
 .float-wa {
     position: fixed;
     bottom: 24px;
@@ -329,14 +325,10 @@ body {
     text-decoration: none;
     box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
     transition: all 0.2s ease;
-    border: none;
-    cursor: pointer;
-    font-family: inherit;
 }
 
 .whatsapp-float:hover {
     background: #128C7E;
     color: white;
     transform: scale(1.05);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-    }
+}
