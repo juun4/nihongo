@@ -2,15 +2,15 @@
 const DATA_URLS = {
     hiragana: 'https://raw.githubusercontent.com/juun4/Database/master/nihongo/hiragana.json',
     katakana: 'https://raw.githubusercontent.com/juun4/Database/master/nihongo/katakana.json',
-    kotoba: 'https://raw.githubusercontent.com/juun4/Database/master/nihongo/katabenda.json'
+    katabenda: 'https://raw.githubusercontent.com/juun4/Database/master/nihongo/katabenda.json',
+    kanjin5: 'https://raw.githubusercontent.com/juun4/Database/master/nihongo/kanjin5.json'
 };
 
 const SOAL_PER_SESI = 20;
 const POIN_PER_SOAL = 5;
-const SKOR_MAX = 100;
 
 let currentMode = null;
-let currentSubMode = null; // untuk kotoba: 'arti', 'baca', 'jepang'
+let currentSubMode = null;
 let fullData = [];
 let sessionQuestions = [];
 let currentIndex = 0;
@@ -56,32 +56,55 @@ function renderHome() {
                 </div>
             </div>
             
-            <div class="mode-card" id="kotobaCard">
-                <div class="mode-icon">📖</div>
-                <div class="mode-title">Kotoba</div>
-                <div class="mode-desc">Kosakata bahasa Jepang</div>
-                <div class="kotoba-menu" id="kotobaMenu">
-                    <button class="kotoba-sub-btn" data-sub="arti">🇮🇩 Tebak Arti</button>
-                    <button class="kotoba-sub-btn" data-sub="baca">🔊 Tebak Cara Baca</button>
-                    <button class="kotoba-sub-btn" data-sub="jepang">🇯🇵 Tebak Jepang</button>
+            <div class="mode-row">
+                <div class="mode-card" data-mode="katabenda">
+                    <div class="mode-icon">📚</div>
+                    <div class="mode-title">Katabenda</div>
+                    <div class="mode-desc">Kosakata bahasa Jepang</div>
+                    <div class="kotoba-menu" id="katabendaMenu">
+                        <button class="kotoba-sub-btn" data-sub="arti">🇮🇩 Tebak Arti</button>
+                        <button class="kotoba-sub-btn" data-sub="baca">🔊 Tebak Cara Baca</button>
+                        <button class="kotoba-sub-btn" data-sub="jepang">🇯🇵 Tebak Jepang</button>
+                    </div>
+                </div>
+                <div class="mode-card" data-mode="kanjin5">
+                    <div class="mode-icon">🈳</div>
+                    <div class="mode-title">Kanjin5</div>
+                    <div class="mode-desc">Belajar Kanji dasar</div>
+                    <div class="kotoba-menu" id="kanjin5Menu">
+                        <button class="kotoba-sub-btn" data-sub="arti">🇮🇩 Tebak Arti</button>
+                        <button class="kotoba-sub-btn" data-sub="baca">🔊 Tebak Bacaan</button>
+                        <button class="kotoba-sub-btn" data-sub="jepang">🇯🇵 Tebak Kanji</button>
+                    </div>
                 </div>
             </div>
         </div>
     `;
 
+    // Mode tanpa sub-mode (Hiragana/Katakana)
     document.querySelectorAll('.mode-card[data-mode]').forEach(card => {
-        card.addEventListener('click', (e) => {
-            if (e.target.closest('.kotoba-sub-btn')) return;
-            const mode = card.getAttribute('data-mode');
+        const mode = card.getAttribute('data-mode');
+        if (mode === 'katabenda' || mode === 'kanjin5') return;
+        card.addEventListener('click', () => {
             startQuiz(mode, null);
         });
     });
 
-    document.querySelectorAll('.kotoba-sub-btn').forEach(btn => {
+    // Katabenda sub-modes
+    document.querySelectorAll('#katabendaMenu .kotoba-sub-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
             const subMode = btn.getAttribute('data-sub');
-            startQuiz('kotoba', subMode);
+            startQuiz('katabenda', subMode);
+        });
+    });
+
+    // Kanjin5 sub-modes
+    document.querySelectorAll('#kanjin5Menu .kotoba-sub-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const subMode = btn.getAttribute('data-sub');
+            startQuiz('kanjin5', subMode);
         });
     });
 }
@@ -105,10 +128,7 @@ async function startQuiz(mode, subMode) {
         if (!Array.isArray(data) || data.length === 0) throw new Error('Data kosong');
         
         fullData = data;
-        
-        // Ambil 20 soal acak
         sessionQuestions = getRandomItems(fullData, SOAL_PER_SESI);
-        
         renderQuiz();
     } catch (error) {
         console.error(error);
@@ -117,6 +137,7 @@ async function startQuiz(mode, subMode) {
                 <div class="quiz-container" style="text-align:center">
                     <h3 style="color:#f87171">⚠️ Gagal memuat data</h3>
                     <p>${error.message}</p>
+                    <p style="font-size:0.8rem">Pastikan file JSON tersedia di GitHub</p>
                     <button class="next-btn back-home" id="backHome">← Kembali</button>
                 </div>
             </div>
@@ -133,22 +154,34 @@ function generateOptionsForQuestion(question, allData, mode, subMode) {
     if (mode === 'hiragana' || mode === 'katakana') {
         correctAnswer = question.jawaban;
         allPossibleAnswers = allData.map(q => q.jawaban);
-    } else if (mode === 'kotoba') {
+    } 
+    else if (mode === 'katabenda') {
         if (subMode === 'arti') {
             correctAnswer = question.arti;
             allPossibleAnswers = allData.map(q => q.arti);
         } else if (subMode === 'baca') {
             correctAnswer = question.cara_baca;
             allPossibleAnswers = allData.map(q => q.cara_baca);
-        } else if (subMode === 'jepang') {
+        } else {
+            correctAnswer = question.soal;
+            allPossibleAnswers = allData.map(q => q.soal);
+        }
+    }
+    else if (mode === 'kanjin5') {
+        if (subMode === 'arti') {
+            correctAnswer = question.indonesiago;
+            allPossibleAnswers = allData.map(q => q.indonesiago);
+        } else if (subMode === 'baca') {
+            correctAnswer = question.nihongo;
+            allPossibleAnswers = allData.map(q => q.nihongo);
+        } else {
             correctAnswer = question.soal;
             allPossibleAnswers = allData.map(q => q.soal);
         }
     }
     
-    // Filter jawaban berbeda
-    const otherAnswers = [...new Set(allPossibleAnswers.filter(a => a !== correctAnswer))];
-    const shuffledOthers = shuffleArray(otherAnswers);
+    const uniqueOthers = [...new Set(allPossibleAnswers.filter(a => a !== correctAnswer))];
+    const shuffledOthers = shuffleArray(uniqueOthers);
     const wrongOptions = shuffledOthers.slice(0, 3);
     let options = [correctAnswer, ...wrongOptions];
     return shuffleArray(options);
@@ -157,7 +190,8 @@ function generateOptionsForQuestion(question, allData, mode, subMode) {
 function getQuestionText(question, mode, subMode) {
     if (mode === 'hiragana' || mode === 'katakana') {
         return { main: question.soal, sub: 'Tebak romaji:' };
-    } else if (mode === 'kotoba') {
+    }
+    else if (mode === 'katabenda') {
         if (subMode === 'arti') {
             return { main: question.soal, sub: 'Arti dalam Bahasa Indonesia?' };
         } else if (subMode === 'baca') {
@@ -166,14 +200,47 @@ function getQuestionText(question, mode, subMode) {
             return { main: question.arti, sub: 'Bahasa Jepangnya?' };
         }
     }
+    else if (mode === 'kanjin5') {
+        if (subMode === 'arti') {
+            return { main: question.soal, sub: 'Arti dalam Bahasa Indonesia?' };
+        } else if (subMode === 'baca') {
+            return { main: question.soal, sub: 'Bacaan (nihongo)?' };
+        } else {
+            return { main: question.indonesiago, sub: 'Kanji Jepangnya?' };
+        }
+    }
     return { main: '?', sub: '' };
 }
 
 function getCorrectAnswerValue(question, mode, subMode) {
     if (mode === 'hiragana' || mode === 'katakana') return question.jawaban;
-    if (subMode === 'arti') return question.arti;
-    if (subMode === 'baca') return question.cara_baca;
-    return question.soal;
+    if (mode === 'katabenda') {
+        if (subMode === 'arti') return question.arti;
+        if (subMode === 'baca') return question.cara_baca;
+        return question.soal;
+    }
+    if (mode === 'kanjin5') {
+        if (subMode === 'arti') return question.indonesiago;
+        if (subMode === 'baca') return question.nihongo;
+        return question.soal;
+    }
+    return '';
+}
+
+function getModeDisplayName(mode, subMode) {
+    if (mode === 'hiragana') return 'HIRAGANA';
+    if (mode === 'katakana') return 'KATAKANA';
+    if (mode === 'katabenda') {
+        if (subMode === 'arti') return 'KATABENDA · Tebak Arti';
+        if (subMode === 'baca') return 'KATABENDA · Tebak Baca';
+        return 'KATABENDA · Tebak Jepang';
+    }
+    if (mode === 'kanjin5') {
+        if (subMode === 'arti') return 'KANJIN5 · Tebak Arti';
+        if (subMode === 'baca') return 'KANJIN5 · Tebak Baca';
+        return 'KANJIN5 · Tebak Kanji';
+    }
+    return mode.toUpperCase();
 }
 
 // ==================== RENDER QUIZ ====================
@@ -208,24 +275,23 @@ function renderQuiz() {
     let feedbackHtml = '';
     if (answered) {
         const isCorrect = selectedAnswer === currentCorrectAnswer;
-        const earnedPoints = isCorrect ? POIN_PER_SOAL : 0;
         feedbackHtml = `
             <div class="feedback" style="background: ${isCorrect ? '#14532d' : '#7f1d1d'}">
-                ${isCorrect ? `✅ Benar! +${POIN_PER_SOAL} poin` : `❌ Salah! Jawaban benar: ${currentCorrectAnswer}`}
+                ${isCorrect ? `✅ Benar! +${POIN_PER_SOAL} poin` : `❌ Salah! Jawaban benar: ${escapeHtml(currentCorrectAnswer)}`}
             </div>
         `;
     }
     
     const currentScore = score;
-    const maxScoreSoal = sessionQuestions.length * POIN_PER_SOAL;
+    const maxScore = sessionQuestions.length * POIN_PER_SOAL;
     
     const app = document.getElementById('app');
     app.innerHTML = `
         <div class="container">
             <div class="quiz-container">
                 <div class="quiz-header">
-                    <span class="badge-mode">${currentMode.toUpperCase()} ${currentSubMode ? `(${getSubModeName(currentSubMode)})` : ''}</span>
-                    <span>🎯 ${currentScore}/${maxScoreSoal}</span>
+                    <span class="badge-mode">${getModeDisplayName(currentMode, currentSubMode)}</span>
+                    <span>🎯 ${currentScore}/${maxScore}</span>
                     <span>📋 ${currentIndex+1}/${sessionQuestions.length}</span>
                 </div>
                 <div class="question-box">
@@ -273,12 +339,6 @@ function renderQuiz() {
         answered = false;
         renderQuiz();
     });
-}
-
-function getSubModeName(subMode) {
-    if (subMode === 'arti') return 'Tebak Arti';
-    if (subMode === 'baca') return 'Tebak Cara Baca';
-    return 'Tebak Jepang';
 }
 
 function renderResult() {
