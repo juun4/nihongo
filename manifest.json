@@ -1,0 +1,16 @@
+{
+  "name": "Nihongo Quiz",
+  "short_name": "NihongoQuiz",
+  "description": "Belajar Hiragana, Katakana, Kotoba, dan Kanji dengan kuis interaktif",
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#0f172a",
+  "background_color": "#0a0f1a",
+  "icons": [
+    {
+      "src": "./icon.jpg",
+      "sizes": "any",
+      "type": "image/jpeg"
+    }
+  ]
+}
