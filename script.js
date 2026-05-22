@@ -1,4 +1,3 @@
-// ==================== KONFIGURASI ====================
 const DATA_URLS = {
     hiragana: 'https://raw.githubusercontent.com/juun4/Database/master/nihongo/hiragana.json',
     katakana: 'https://raw.githubusercontent.com/juun4/Database/master/nihongo/katakana.json',
@@ -87,57 +86,32 @@ function renderHome() {
     if (floatContainer) {
         floatContainer.innerHTML = `
             <div class="float-wa">
-                <a href="https://wa.me/6285727631507?text=Halo%2C%20saya%20mau%20request%20soal%20bahasa%20Jepang" 
-                   class="whatsapp-float" 
-                   target="_blank">
-                   💬 Request Soal
-                </a>
+                <a href="https://wa.me/6285727631507?text=Halo%2C%20saya%20mau%20request%20soal%20bahasa%20Jepang" class="whatsapp-float" target="_blank">💬 Request Soal</a>
             </div>
         `;
     }
 
     document.querySelectorAll('.mode-card[data-mode]').forEach(card => {
-        const mode = card.getAttribute('data-mode');
-        card.addEventListener('click', () => {
-            startQuiz(mode, null);
-        });
+        card.addEventListener('click', () => startQuiz(card.dataset.mode, null));
     });
 
-    const kotobaCard = document.querySelector('.mode-card-full[data-mode="katabenda"]');
-    if (kotobaCard) {
-        kotobaCard.addEventListener('click', (e) => {
-            if (e.target.closest('.kotoba-sub-btn')) return;
-            startQuiz('katabenda', 'arti');
-        });
-    }
-    
     document.querySelectorAll('#katabendaMenu .kotoba-sub-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
-            startQuiz('katabenda', btn.getAttribute('data-sub'));
+            startQuiz('katabenda', btn.dataset.sub);
         });
     });
 
-    const kanjiCard = document.querySelector('.mode-card-full[data-mode="kanjin5"]');
-    if (kanjiCard) {
-        kanjiCard.addEventListener('click', (e) => {
-            if (e.target.closest('.kotoba-sub-btn')) return;
-            startQuiz('kanjin5', 'arti');
-        });
-    }
-    
     document.querySelectorAll('#kanjin5Menu .kotoba-sub-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
-            startQuiz('kanjin5', btn.getAttribute('data-sub'));
+            startQuiz('kanjin5', btn.dataset.sub);
         });
     });
 }
 
 async function startQuiz(mode, subMode) {
-    const floatContainer = document.getElementById('floatWaContainer');
-    if (floatContainer) floatContainer.innerHTML = '';
-    
+    document.getElementById('floatWaContainer').innerHTML = '';
     currentMode = mode;
     currentSubMode = subMode;
     currentIndex = 0;
@@ -149,72 +123,46 @@ async function startQuiz(mode, subMode) {
     app.innerHTML = `<div class="container loading">⏳ Memuat data ${mode}...</div>`;
     
     try {
-        const response = await fetch(DATA_URLS[mode]);
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const data = await response.json();
-        if (!Array.isArray(data) || data.length === 0) throw new Error('Data kosong');
+        const res = await fetch(DATA_URLS[mode]);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (!data.length) throw new Error('Data kosong');
         fullData = data;
         sessionQuestions = getRandomItems(fullData, SOAL_PER_SESI);
         renderQuiz();
-    } catch (error) {
-        app.innerHTML = `
-            <div class="container">
-                <div class="quiz-container" style="text-align:center">
-                    <h3 style="color:#f87171">⚠️ Gagal memuat data</h3>
-                    <p>${error.message}</p>
-                    <button class="next-btn back-home" id="backHome">← Kembali</button>
-                </div>
-            </div>
-        `;
-        document.getElementById('backHome')?.addEventListener('click', () => renderHome());
+    } catch (err) {
+        app.innerHTML = `<div class="container"><div class="quiz-container" style="text-align:center"><h3 style="color:#f87171">⚠️ Gagal memuat data</h3><p>${err.message}</p><button class="next-btn back-home" id="backHome">← Kembali</button></div></div>`;
+        document.getElementById('backHome')?.addEventListener('click', renderHome);
     }
 }
 
-function generateOptionsForQuestion(question, allData, mode, subMode) {
-    let correctAnswer;
-    let allPossibleAnswers = [];
-    
+function generateOptions(question, allData, mode, subMode) {
+    let correct, allAnswers = [];
     if (mode === 'hiragana' || mode === 'katakana') {
-        correctAnswer = question.jawaban;
-        allPossibleAnswers = allData.map(q => q.jawaban);
+        correct = question.jawaban;
+        allAnswers = allData.map(q => q.jawaban);
     } else if (mode === 'katabenda') {
-        if (subMode === 'arti') {
-            correctAnswer = question.arti;
-            allPossibleAnswers = allData.map(q => q.arti);
-        } else if (subMode === 'baca') {
-            correctAnswer = question.cara_baca;
-            allPossibleAnswers = allData.map(q => q.cara_baca);
-        } else {
-            correctAnswer = question.soal;
-            allPossibleAnswers = allData.map(q => q.soal);
-        }
+        if (subMode === 'arti') { correct = question.arti; allAnswers = allData.map(q => q.arti); }
+        else if (subMode === 'baca') { correct = question.cara_baca; allAnswers = allData.map(q => q.cara_baca); }
+        else { correct = question.soal; allAnswers = allData.map(q => q.soal); }
     } else if (mode === 'kanjin5') {
-        if (subMode === 'arti') {
-            correctAnswer = question.indonesiago;
-            allPossibleAnswers = allData.map(q => q.indonesiago);
-        } else if (subMode === 'baca') {
-            correctAnswer = question.nihongo;
-            allPossibleAnswers = allData.map(q => q.nihongo);
-        } else {
-            correctAnswer = question.soal;
-            allPossibleAnswers = allData.map(q => q.soal);
-        }
+        if (subMode === 'arti') { correct = question.indonesiago; allAnswers = allData.map(q => q.indonesiago); }
+        else if (subMode === 'baca') { correct = question.nihongo; allAnswers = allData.map(q => q.nihongo); }
+        else { correct = question.soal; allAnswers = allData.map(q => q.soal); }
     }
-    
-    const uniqueOthers = [...new Set(allPossibleAnswers.filter(a => a !== correctAnswer))];
-    const shuffledOthers = shuffleArray(uniqueOthers);
-    const wrongOptions = shuffledOthers.slice(0, 3);
-    return shuffleArray([correctAnswer, ...wrongOptions]);
+    const others = [...new Set(allAnswers.filter(a => a !== correct))];
+    const wrongs = shuffleArray(others).slice(0, 3);
+    return shuffleArray([correct, ...wrongs]);
 }
 
-function getQuestionText(question, mode, subMode) {
-    if (mode === 'hiragana' || mode === 'katakana') {
-        return { main: question.soal, sub: 'Tebak romaji:' };
-    } else if (mode === 'katabenda') {
+function getQText(question, mode, subMode) {
+    if (mode === 'hiragana' || mode === 'katakana') return { main: question.soal, sub: 'Tebak romaji:' };
+    if (mode === 'katabenda') {
         if (subMode === 'arti') return { main: question.soal, sub: 'Arti dalam Bahasa Indonesia?' };
         if (subMode === 'baca') return { main: question.soal, sub: 'Cara baca (romaji)?' };
         return { main: question.arti, sub: 'Bahasa Jepangnya?' };
-    } else if (mode === 'kanjin5') {
+    }
+    if (mode === 'kanjin5') {
         if (subMode === 'arti') return { main: question.soal, sub: 'Arti dalam Bahasa Indonesia?' };
         if (subMode === 'baca') return { main: question.soal, sub: 'Bacaan (nihongo)?' };
         return { main: question.indonesiago, sub: 'Kanji Jepangnya?' };
@@ -222,7 +170,7 @@ function getQuestionText(question, mode, subMode) {
     return { main: '?', sub: '' };
 }
 
-function getCorrectAnswerValue(question, mode, subMode) {
+function getCorrect(question, mode, subMode) {
     if (mode === 'hiragana' || mode === 'katakana') return question.jawaban;
     if (mode === 'katabenda') {
         if (subMode === 'arti') return question.arti;
@@ -237,7 +185,7 @@ function getCorrectAnswerValue(question, mode, subMode) {
     return '';
 }
 
-function getModeDisplayName(mode, subMode) {
+function getModeName(mode, subMode) {
     if (mode === 'hiragana') return 'HIRAGANA';
     if (mode === 'katakana') return 'KATAKANA';
     if (mode === 'katabenda') {
@@ -254,133 +202,74 @@ function getModeDisplayName(mode, subMode) {
 }
 
 function renderQuiz() {
-    if (currentIndex >= sessionQuestions.length) {
-        renderResult();
-        return;
-    }
-    
-    const question = sessionQuestions[currentIndex];
-    currentCorrectAnswer = getCorrectAnswerValue(question, currentMode, currentSubMode);
-    
-    if (currentOptionsLocked[currentIndex]) {
-        currentOptions = currentOptionsLocked[currentIndex];
-    } else {
-        currentOptions = generateOptionsForQuestion(question, fullData, currentMode, currentSubMode);
+    if (currentIndex >= sessionQuestions.length) return renderResult();
+    const q = sessionQuestions[currentIndex];
+    currentCorrectAnswer = getCorrect(q, currentMode, currentSubMode);
+    if (currentOptionsLocked[currentIndex]) currentOptions = currentOptionsLocked[currentIndex];
+    else {
+        currentOptions = generateOptions(q, fullData, currentMode, currentSubMode);
         currentOptionsLocked[currentIndex] = [...currentOptions];
     }
-    
-    const { main, sub } = getQuestionText(question, currentMode, currentSubMode);
+    const { main, sub } = getQText(q, currentMode, currentSubMode);
     const letters = ['A', 'B', 'C', 'D'];
-    
-    let optionsHtml = '';
-    currentOptions.forEach((opt, idx) => {
-        let statusClass = '';
+    let optsHtml = '', fbHtml = '';
+    currentOptions.forEach((opt, i) => {
+        let cls = '';
         if (answered) {
-            if (opt === currentCorrectAnswer) statusClass = 'correct';
-            else if (selectedAnswer === opt && opt !== currentCorrectAnswer) statusClass = 'wrong';
+            if (opt === currentCorrectAnswer) cls = 'correct';
+            else if (selectedAnswer === opt && opt !== currentCorrectAnswer) cls = 'wrong';
         }
-        optionsHtml += `
-            <button class="option-btn ${statusClass}" data-answer="${escapeHtml(opt)}" ${answered ? 'disabled' : ''}>
-                <span class="option-prefix">${letters[idx]}</span>
-                <span>${escapeHtml(opt)}</span>
-            </button>
-        `;
+        optsHtml += `<button class="option-btn ${cls}" data-answer="${escapeHtml(opt)}" ${answered ? 'disabled' : ''}><span class="option-prefix">${letters[i]}</span>${escapeHtml(opt)}</button>`;
     });
-    
-    let feedbackHtml = '';
     if (answered) {
         const isCorrect = selectedAnswer === currentCorrectAnswer;
-        feedbackHtml = `
-            <div class="feedback" style="background: ${isCorrect ? '#14532d' : '#7f1d1d'}">
-                ${isCorrect ? `✅ Benar! +${POIN_PER_SOAL} poin` : `❌ Salah! Jawaban benar: ${escapeHtml(currentCorrectAnswer)}`}
-            </div>
-        `;
+        fbHtml = `<div class="feedback" style="background:${isCorrect ? '#14532d' : '#7f1d1d'}">${isCorrect ? `✅ Benar! +${POIN_PER_SOAL} poin` : `❌ Salah! Jawaban benar: ${escapeHtml(currentCorrectAnswer)}`}</div>`;
     }
-    
-    const app = document.getElementById('app');
-    app.innerHTML = `
-        <div class="container">
-            <div class="quiz-container">
-                <div class="quiz-header">
-                    <span class="badge-mode">${getModeDisplayName(currentMode, currentSubMode)}</span>
-                    <span>🎯 ${score}/${sessionQuestions.length * POIN_PER_SOAL}</span>
-                    <span>📋 ${currentIndex+1}/${sessionQuestions.length}</span>
-                </div>
-                <div class="question-box">
-                    <div class="question-jp">${escapeHtml(main)}</div>
-                    <div class="question-sub">${sub}</div>
-                </div>
-                <div class="options">${optionsHtml}</div>
-                ${feedbackHtml}
-                ${answered ? `<button class="next-btn" id="nextBtn">${currentIndex+1 === sessionQuestions.length ? '🏁 Lihat Hasil' : '→ Soal Berikutnya'}</button>` : ''}
-                <button class="next-btn secondary-btn" id="resetQuizBtn">🔄 Reset Quiz (Soal Baru)</button>
-                <button class="next-btn back-home" id="backHomeBtn">← Ganti Mode</button>
-            </div>
-        </div>
-    `;
+    document.getElementById('app').innerHTML = `
+        <div class="container"><div class="quiz-container"><div class="quiz-header"><span class="badge-mode">${getModeName(currentMode, currentSubMode)}</span><span>🎯 ${score}/${sessionQuestions.length * POIN_PER_SOAL}</span><span>📋 ${currentIndex+1}/${sessionQuestions.length}</span></div>
+        <div class="question-box"><div class="question-jp">${escapeHtml(main)}</div><div class="question-sub">${sub}</div></div>
+        <div class="options">${optsHtml}</div>${fbHtml}
+        ${answered ? `<button class="next-btn" id="nextBtn">${currentIndex+1 === sessionQuestions.length ? '🏁 Lihat Hasil' : '→ Soal Berikutnya'}</button>` : ''}
+        <button class="next-btn secondary-btn" id="resetQuizBtn">🔄 Reset Quiz (Soal Baru)</button>
+        <button class="next-btn back-home" id="backHomeBtn">← Ganti Mode</button></div></div>`;
     
     if (!answered) {
         document.querySelectorAll('.option-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
+            btn.onclick = () => {
                 if (answered) return;
-                selectedAnswer = btn.getAttribute('data-answer');
+                selectedAnswer = btn.dataset.answer;
                 answered = true;
                 if (selectedAnswer === currentCorrectAnswer) score += POIN_PER_SOAL;
                 renderQuiz();
-            });
+            };
         });
     }
-    
     document.getElementById('resetQuizBtn')?.addEventListener('click', () => {
         sessionQuestions = getRandomItems(fullData, SOAL_PER_SESI);
-        currentIndex = 0;
-        score = 0;
-        answered = false;
-        currentOptionsLocked = [];
+        currentIndex = 0; score = 0; answered = false; currentOptionsLocked = [];
         renderQuiz();
     });
-    document.getElementById('backHomeBtn')?.addEventListener('click', () => renderHome());
-    document.getElementById('nextBtn')?.addEventListener('click', () => {
-        currentIndex++;
-        answered = false;
-        renderQuiz();
-    });
+    document.getElementById('backHomeBtn')?.addEventListener('click', renderHome);
+    document.getElementById('nextBtn')?.addEventListener('click', () => { currentIndex++; answered = false; renderQuiz(); });
 }
 
 function renderResult() {
     const maxScore = sessionQuestions.length * POIN_PER_SOAL;
-    const percentage = (score / maxScore) * 100;
-    let message = percentage >= 80 ? '🎉 Hebat! Penguasaanmu luar biasa!' : percentage >= 60 ? '👍 Bagus! Terus belajar ya!' : percentage >= 40 ? '📚 Lumayan, tapi perlu lebih banyak latihan.' : '💪 Jangan menyerah! Coba lagi!';
-    
-    const app = document.getElementById('app');
-    app.innerHTML = `
-        <div class="container">
-            <div class="quiz-container result-box">
-                <h2>✨ Hasil Quiz ✨</h2>
-                <div class="result-score">${score} / ${maxScore}</div>
-                <p style="font-size:1.2rem">${Math.round(percentage)}%</p>
-                <p>${message}</p>
-                <div class="btn-group">
-                    <button class="next-btn" id="retryBtn">🔄 Coba Lagi (Soal Baru)</button>
-                    <button class="next-btn secondary-btn" id="homeBtn">← Pilih Mode Lain</button>
-                </div>
-            </div>
-        </div>
-    `;
+    const percent = Math.round((score / maxScore) * 100);
+    let msg = percent >= 80 ? '🎉 Hebat!' : percent >= 60 ? '👍 Bagus!' : percent >= 40 ? '📚 Lumayan' : '💪 Coba lagi!';
+    document.getElementById('app').innerHTML = `
+        <div class="container"><div class="quiz-container result-box"><h2>✨ Hasil Quiz ✨</h2>
+        <div class="result-score">${score} / ${maxScore}</div><p style="font-size:1.2rem">${percent}%</p><p>${msg}</p>
+        <div class="btn-group"><button class="next-btn" id="retryBtn">🔄 Coba Lagi (Soal Baru)</button>
+        <button class="next-btn secondary-btn" id="homeBtn">← Pilih Mode Lain</button></div></div></div>`;
     document.getElementById('retryBtn')?.addEventListener('click', () => {
         sessionQuestions = getRandomItems(fullData, SOAL_PER_SESI);
-        currentIndex = 0;
-        score = 0;
-        answered = false;
-        currentOptionsLocked = [];
+        currentIndex = 0; score = 0; answered = false; currentOptionsLocked = [];
         renderQuiz();
     });
-    document.getElementById('homeBtn')?.addEventListener('click', () => renderHome());
+    document.getElementById('homeBtn')?.addEventListener('click', renderHome);
 }
 
-function escapeHtml(str) {
-    if (!str) return '';
-    return String(str).replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
-}
+function escapeHtml(str) { return String(str).replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'); }
 
 renderHome();
