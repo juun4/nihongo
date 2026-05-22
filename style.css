@@ -18,14 +18,44 @@ body {
     margin: 0 auto;
 }
 
+/* ========== HOME PAGE ========== */
 .home-title {
     text-align: center;
-    font-size: 2.5rem;
+    font-size: 2.2rem;
     background: linear-gradient(135deg, #ffe6b0, #ffb347);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
     margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* Bendera Jepang manual - lingkaran putih + merah */
+.japan-flag {
+    display: inline-block;
+    width: 36px;
+    height: 36px;
+    background: #fff;
+    border-radius: 50%;
+    position: relative;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.2);
+    vertical-align: middle;
+}
+
+.japan-flag::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 56%;
+    height: 56%;
+    background: #BC002D;
+    border-radius: 50%;
 }
 
 .home-sub {
@@ -120,6 +150,7 @@ body {
     color: #0f1724;
 }
 
+/* ========== QUIZ PAGE ========== */
 .quiz-container {
     background: rgba(15, 23, 42, 0.8);
     backdrop-filter: blur(12px);
@@ -284,6 +315,7 @@ body {
     margin-top: 24px;
 }
 
+/* ========== FOOTER ========== */
 .simple-footer {
     text-align: center;
     margin-top: 48px;
@@ -304,6 +336,7 @@ body {
     text-decoration: underline;
 }
 
+/* ========== FLOATING WHATSAPP BUTTON ========== */
 .float-wa {
     position: fixed;
     bottom: 24px;
@@ -331,4 +364,4 @@ body {
     background: #128C7E;
     color: white;
     transform: scale(1.05);
-}
+    }
