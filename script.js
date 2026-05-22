@@ -19,6 +19,7 @@ let answered = false;
 let selectedAnswer = null;
 let currentOptions = [];
 let currentCorrectAnswer = null;
+let currentOptionsLocked = []; // <-- Kunci opsi per soal
 
 // ==================== UTILS ====================
 function shuffleArray(arr) {
@@ -81,7 +82,6 @@ function renderHome() {
         </div>
     `;
 
-    // Mode tanpa sub-mode (Hiragana/Katakana)
     document.querySelectorAll('.mode-card[data-mode]').forEach(card => {
         const mode = card.getAttribute('data-mode');
         if (mode === 'katabenda' || mode === 'kanjin5') return;
@@ -90,21 +90,17 @@ function renderHome() {
         });
     });
 
-    // Katabenda sub-modes
     document.querySelectorAll('#katabendaMenu .kotoba-sub-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
-            const subMode = btn.getAttribute('data-sub');
-            startQuiz('katabenda', subMode);
+            startQuiz('katabenda', btn.getAttribute('data-sub'));
         });
     });
 
-    // Kanjin5 sub-modes
     document.querySelectorAll('#kanjin5Menu .kotoba-sub-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
-            const subMode = btn.getAttribute('data-sub');
-            startQuiz('kanjin5', subMode);
+            startQuiz('kanjin5', btn.getAttribute('data-sub'));
         });
     });
 }
@@ -116,6 +112,7 @@ async function startQuiz(mode, subMode) {
     currentIndex = 0;
     score = 0;
     answered = false;
+    currentOptionsLocked = []; // RESET LOCKED
     
     const app = document.getElementById('app');
     app.innerHTML = `<div class="container loading">⏳ Memuat data ${mode}...</div>`;
@@ -137,7 +134,6 @@ async function startQuiz(mode, subMode) {
                 <div class="quiz-container" style="text-align:center">
                     <h3 style="color:#f87171">⚠️ Gagal memuat data</h3>
                     <p>${error.message}</p>
-                    <p style="font-size:0.8rem">Pastikan file JSON tersedia di GitHub</p>
                     <button class="next-btn back-home" id="backHome">← Kembali</button>
                 </div>
             </div>
@@ -252,7 +248,15 @@ function renderQuiz() {
     
     const question = sessionQuestions[currentIndex];
     currentCorrectAnswer = getCorrectAnswerValue(question, currentMode, currentSubMode);
-    currentOptions = generateOptionsForQuestion(question, fullData, currentMode, currentSubMode);
+    
+    // 🔒 Cek apakah opsi untuk soal ini sudah pernah digenerate
+    if (currentOptionsLocked[currentIndex]) {
+        currentOptions = currentOptionsLocked[currentIndex];
+    } else {
+        currentOptions = generateOptionsForQuestion(question, fullData, currentMode, currentSubMode);
+        currentOptionsLocked[currentIndex] = [...currentOptions]; // simpan opsi tetap
+    }
+    
     const { main, sub } = getQuestionText(question, currentMode, currentSubMode);
     
     let optionsHtml = '';
@@ -330,6 +334,7 @@ function renderQuiz() {
         currentIndex = 0;
         score = 0;
         answered = false;
+        currentOptionsLocked = [];
         renderQuiz();
     });
     
@@ -371,6 +376,7 @@ function renderResult() {
         currentIndex = 0;
         score = 0;
         answered = false;
+        currentOptionsLocked = [];
         renderQuiz();
     });
     document.getElementById('homeBtn')?.addEventListener('click', renderHome);
