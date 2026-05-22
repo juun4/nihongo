@@ -1,14 +1,416 @@
 <!DOCTYPE html>
 <html lang="id">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>Nihongo Quiz — Belajar Hiragana, Katakana, Kotoba</title>
-    <meta name="description" content="Quiz bahasa Jepang dengan pilihan ganda. Belajar hiragana, katakana, dan kosakata." />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
-</html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nihongo Quiz | Belajar Hiragana & Katakana</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(145deg, #0b1120 0%, #0a0f1a 100%);
+            min-height: 100vh;
+            color: #f1f5f9;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Home Menu */
+        .home-menu {
+            text-align: center;
+            padding: 2rem 1rem;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #ffe6b0, #ffb347);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .mode-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin: 2rem 0;
+        }
+
+        .mode-btn {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            padding: 0.8rem 1.8rem;
+            border-radius: 60px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #facc15;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .mode-btn:hover {
+            background: #f59e0b;
+            color: #0f1724;
+            transform: scale(1.02);
+        }
+
+        /* Quiz Card */
+        .quiz-card {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            border-radius: 48px;
+            padding: 2rem 1.5rem;
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            background: #0f172a;
+            padding: 0.7rem 1.3rem;
+            border-radius: 60px;
+            margin-bottom: 2rem;
+            font-weight: 600;
+        }
+
+        .question {
+            font-size: 5rem;
+            text-align: center;
+            font-weight: 800;
+            font-family: 'Noto Sans JP', monospace;
+            background: linear-gradient(135deg, #fff4e0, #ffdd99);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin: 1rem 0;
+            letter-spacing: 8px;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            margin: 1.5rem 0;
+        }
+
+        .option-btn {
+            background: #1e293b;
+            border: 2px solid #334155;
+            padding: 1rem 1.5rem;
+            border-radius: 60px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.15s;
+            color: #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background: #2d3a52;
+            border-color: #f59e0b;
+            transform: translateX(6px);
+        }
+
+        .option-btn.correct {
+            background: #15803d;
+            border-color: #4ade80;
+        }
+
+        .option-btn.wrong {
+            background: #991b1b;
+            border-color: #f87171;
+            text-decoration: line-through;
+        }
+
+        .option-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .prefix {
+            background: #f59e0b;
+            color: #0f172a;
+            width: 38px;
+            height: 38px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 60px;
+            font-weight: 800;
+        }
+
+        .feedback {
+            text-align: center;
+            padding: 0.8rem;
+            border-radius: 60px;
+            margin: 1rem 0;
+            font-weight: 500;
+        }
+
+        .next-btn {
+            background: linear-gradient(95deg, #f59e0b, #d97706);
+            width: 100%;
+            padding: 0.9rem;
+            border: none;
+            border-radius: 60px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #0c0a2a;
+            cursor: pointer;
+            margin-top: 0.5rem;
+        }
+
+        .reset-btn {
+            background: #334155;
+            margin-top: 0.8rem;
+            color: #facc15;
+        }
+
+        .back-btn {
+            background: #1e293b;
+            margin-bottom: 1rem;
+            color: #94a3b8;
+        }
+
+        button {
+            font-family: inherit;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="app">
+        <!-- Home Page akan di-render JavaScript -->
+    </div>
+
+    <script>
+        // ==================== DATA DARI GITHUB ====================
+        const DATA_URLS = {
+            hiragana: 'https://raw.githubusercontent.com/juun4/Database/master/nihongo/hiragana.json',
+            katakana: 'https://raw.githubusercontent.com/juun4/Database/master/nihongo/katakana.json',
+            kotoba: 'https://raw.githubusercontent.com/juun4/Database/master/nihongo/kotoba.json'
+        };
+
+        // State global
+        let currentMode = null;
+        let quizData = [];
+        let shuffledQuestions = [];
+        let currentIndex = 0;
+        let score = 0;
+        let answered = false;
+        let selectedAnswer = null;
+        let currentOptions = [];
+        let currentCorrectAnswer = '';
+
+        // Helper: shuffle array
+        function shuffleArray(arr) {
+            const newArr = [...arr];
+            for (let i = newArr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+            }
+            return newArr;
+        }
+
+        // Generate 4 opsi (1 benar + 3 random salah)
+        function generateOptions(question, allData) {
+            const correct = question.jawaban;
+            const others = allData.filter(item => item.jawaban !== correct).map(item => item.jawaban);
+            const shuffledOthers = shuffleArray([...others]);
+            const wrongOptions = shuffledOthers.slice(0, 3);
+            let options = [correct, ...wrongOptions];
+            return shuffleArray(options);
+        }
+
+        // Render Home Page
+        function renderHome() {
+            document.getElementById('app').innerHTML = `
+                <div class="home-menu">
+                    <h1 class="title">🇯🇵 NIHONGO QUIZ</h1>
+                    <p style="opacity: 0.7; margin-bottom: 2rem;">pilih mode belajar</p>
+                    <div class="mode-buttons">
+                        <button class="mode-btn" data-mode="hiragana">🍡 Hiragana</button>
+                        <button class="mode-btn" data-mode="katakana">🗡️ Katakana</button>
+                        <button class="mode-btn" data-mode="kotoba">📖 Kotoba</button>
+                    </div>
+                </div>
+            `;
+
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const mode = btn.getAttribute('data-mode');
+                    loadQuiz(mode);
+                });
+            });
+        }
+
+        // Fetch data dan mulai quiz
+        async function loadQuiz(mode) {
+            currentMode = mode;
+            currentIndex = 0;
+            score = 0;
+            answered = false;
+            
+            document.getElementById('app').innerHTML = `
+                <div style="text-align: center; padding: 4rem;">
+                    <p>⏳ Memuat data ${mode}...</p>
+                </div>
+            `;
+
+            try {
+                const response = await fetch(DATA_URLS[mode]);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const data = await response.json();
+                
+                if (!Array.isArray(data) || data.length === 0) {
+                    throw new Error('Data kosong atau format salah');
+                }
+                
+                console.log(`✅ Loaded ${data.length} questions for ${mode}`);
+                quizData = data;
+                shuffledQuestions = shuffleArray(data);
+                renderQuiz();
+            } catch (error) {
+                console.error('Fetch error:', error);
+                document.getElementById('app').innerHTML = `
+                    <div class="quiz-card" style="text-align: center;">
+                        <h3 style="color: #f87171;">⚠️ Gagal memuat data</h3>
+                        <p>Error: ${error.message}</p>
+                        <p style="font-size: 0.8rem; margin: 1rem 0;">Pastikan file JSON tersedia di GitHub</p>
+                        <button class="next-btn back-btn" id="backHomeBtn">← Kembali</button>
+                    </div>
+                `;
+                document.getElementById('backHomeBtn')?.addEventListener('click', renderHome);
+            }
+        }
+
+        // Render quiz current question
+        function renderQuiz() {
+            if (currentIndex >= shuffledQuestions.length) {
+                renderResult();
+                return;
+            }
+
+            const question = shuffledQuestions[currentIndex];
+            currentCorrectAnswer = question.jawaban;
+            currentOptions = generateOptions(question, shuffledQuestions);
+            
+            let optionsHtml = '';
+            const letters = ['A', 'B', 'C', 'D'];
+            
+            currentOptions.forEach((opt, idx) => {
+                let statusClass = '';
+                if (answered) {
+                    if (opt === currentCorrectAnswer) statusClass = 'correct';
+                    else if (selectedAnswer === opt && opt !== currentCorrectAnswer) statusClass = 'wrong';
+                }
+                optionsHtml += `
+                    <button class="option-btn ${statusClass}" data-answer="${opt}" ${answered ? 'disabled' : ''}>
+                        <span class="prefix">${letters[idx]}</span> ${opt}
+                    </button>
+                `;
+            });
+
+            let feedbackHtml = '';
+            if (answered) {
+                const isCorrect = selectedAnswer === currentCorrectAnswer;
+                feedbackHtml = `
+                    <div class="feedback" style="background: ${isCorrect ? '#14532d' : '#7f1d1d'}">
+                        ${isCorrect ? '✅ Benar!' : `❌ Salah! Jawaban benar: ${currentCorrectAnswer}`}
+                    </div>
+                `;
+            }
+
+            document.getElementById('app').innerHTML = `
+                <div class="quiz-card">
+                    <div class="quiz-header">
+                        <span>📖 ${currentMode.toUpperCase()}</span>
+                        <span>🎯 Skor: ${score}</span>
+                        <span>📋 ${currentIndex+1}/${shuffledQuestions.length}</span>
+                    </div>
+                    <div class="question">${question.soal}</div>
+                    <div class="options" id="optionsContainer">
+                        ${optionsHtml}
+                    </div>
+                    ${feedbackHtml}
+                    ${answered ? `<button class="next-btn" id="nextBtn">${currentIndex+1 === shuffledQuestions.length ? '🏁 Selesai' : '→ Soal Berikutnya'}</button>` : ''}
+                    <button class="next-btn reset-btn" id="resetQuizBtn">🔄 Reset Quiz</button>
+                    <button class="next-btn back-btn" id="backToHomeBtn">← Ganti Mode</button>
+                </div>
+            `;
+
+            // Event listeners
+            if (!answered) {
+                document.querySelectorAll('.option-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        if (answered) return;
+                        const answer = btn.getAttribute('data-answer');
+                        selectedAnswer = answer;
+                        answered = true;
+                        
+                        if (answer === currentCorrectAnswer) {
+                            score++;
+                        }
+                        renderQuiz();
+                    });
+                });
+            }
+            
+            document.getElementById('resetQuizBtn')?.addEventListener('click', () => {
+                shuffledQuestions = shuffleArray(quizData);
+                currentIndex = 0;
+                score = 0;
+                answered = false;
+                renderQuiz();
+            });
+            
+            document.getElementById('backToHomeBtn')?.addEventListener('click', renderHome);
+            document.getElementById('nextBtn')?.addEventListener('click', () => {
+                currentIndex++;
+                answered = false;
+                renderQuiz();
+            });
+        }
+
+        function renderResult() {
+            document.getElementById('app').innerHTML = `
+                <div class="quiz-card" style="text-align: center;">
+                    <h2>✨ Hasil Quiz ${currentMode} ✨</h2>
+                    <p style="font-size: 2.5rem; margin: 2rem; font-weight: bold;">${score} / ${shuffledQuestions.length}</p>
+                    <button class="next-btn" id="restartBtn">🔄 Kerjakan Ulang</button>
+                    <button class="next-btn back-btn" id="homeBtn">← Pilih Mode Lain</button>
+                </div>
+            `;
+            document.getElementById('restartBtn')?.addEventListener('click', () => {
+                shuffledQuestions = shuffleArray(quizData);
+                currentIndex = 0;
+                score = 0;
+                answered = false;
+                renderQuiz();
+            });
+            document.getElementById('homeBtn')?.addEventListener('click', renderHome);
+        }
+
+        // Start app
+        renderHome();
+    </script>
+</body>
+  </html>
