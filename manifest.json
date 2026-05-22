@@ -1,6 +1,6 @@
 {
-  "name": "Nihongo Quiz",
-  "short_name": "NihongoQuiz",
+  "name": "Nihon Go Quiz",
+  "short_name": "NihonGoQuiz",
   "description": "Belajar Hiragana, Katakana, Kotoba, dan Kanji dengan kuis interaktif",
   "start_url": ".",
   "display": "standalone",
