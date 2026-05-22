@@ -81,6 +81,7 @@ body {
     display: flex;
     gap: 12px;
     justify-content: center;
+    flex-wrap: wrap;
 }
 
 .kotoba-sub-btn {
@@ -268,3 +269,50 @@ body {
 .hidden {
     display: none;
 }
+
+/* ========== FOOTER ========== */
+.footer {
+    margin-top: 48px;
+    padding: 24px 20px;
+    text-align: center;
+    border-top: 1px solid rgba(245, 158, 11, 0.2);
+    font-size: 0.8rem;
+    color: #94a3b8;
+}
+
+.footer p {
+    margin-bottom: 12px;
+}
+
+.footer a {
+    color: #facc15;
+    text-decoration: none;
+    transition: 0.2s;
+}
+
+.footer a:hover {
+    color: #f59e0b;
+    text-decoration: underline;
+}
+
+.whatsapp-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #25D366;
+    color: #0c0a2a !important;
+    padding: 8px 20px;
+    border-radius: 60px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-top: 12px;
+    transition: 0.1s;
+    text-decoration: none !important;
+}
+
+.whatsapp-btn:hover {
+    background: #128C7E;
+    color: white !important;
+    transform: scale(1.02);
+    text-decoration: none !important;
+    }
