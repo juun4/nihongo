@@ -19,7 +19,7 @@ let answered = false;
 let selectedAnswer = null;
 let currentOptions = [];
 let currentCorrectAnswer = null;
-let currentOptionsLocked = []; // <-- Kunci opsi per soal
+let currentOptionsLocked = [];
 
 // ==================== UTILS ====================
 function shuffleArray(arr) {
@@ -79,6 +79,17 @@ function renderHome() {
                     </div>
                 </div>
             </div>
+            
+            <!-- FOOTER -->
+            <div class="footer">
+                <p>© 2025 <strong>Nihongo Quiz</strong> | Created by <strong>Juun4</strong></p>
+                <p>🌐 <a href="https://www.juun4.cloud" target="_blank">www.juun4.cloud</a></p>
+                <a href="https://wa.me/6285727631507?text=Halo%2C%20saya%20mau%20request%20soal%20Kanji%20N2" 
+                   class="whatsapp-btn" 
+                   target="_blank">
+                   💬 Request Kanji N2
+                </a>
+            </div>
         </div>
     `;
 
@@ -112,7 +123,7 @@ async function startQuiz(mode, subMode) {
     currentIndex = 0;
     score = 0;
     answered = false;
-    currentOptionsLocked = []; // RESET LOCKED
+    currentOptionsLocked = [];
     
     const app = document.getElementById('app');
     app.innerHTML = `<div class="container loading">⏳ Memuat data ${mode}...</div>`;
@@ -227,14 +238,14 @@ function getModeDisplayName(mode, subMode) {
     if (mode === 'hiragana') return 'HIRAGANA';
     if (mode === 'katakana') return 'KATAKANA';
     if (mode === 'katabenda') {
-        if (subMode === 'arti') return 'KATABENDA · Tebak Arti';
-        if (subMode === 'baca') return 'KATABENDA · Tebak Baca';
-        return 'KATABENDA · Tebak Jepang';
+        if (subMode === 'arti') return 'KOTOKA · Tebak Arti';
+        if (subMode === 'baca') return 'KOTOKA · Tebak Baca';
+        return 'KOTOKA · Tebak Jepang';
     }
     if (mode === 'kanjin5') {
-        if (subMode === 'arti') return 'KANJIN5 · Tebak Arti';
-        if (subMode === 'baca') return 'KANJIN5 · Tebak Baca';
-        return 'KANJIN5 · Tebak Kanji';
+        if (subMode === 'arti') return 'KANJI N5 · Tebak Arti';
+        if (subMode === 'baca') return 'KANJI N5 · Tebak Baca';
+        return 'KANJI N5 · Tebak Kanji';
     }
     return mode.toUpperCase();
 }
@@ -249,12 +260,11 @@ function renderQuiz() {
     const question = sessionQuestions[currentIndex];
     currentCorrectAnswer = getCorrectAnswerValue(question, currentMode, currentSubMode);
     
-    // 🔒 Cek apakah opsi untuk soal ini sudah pernah digenerate
     if (currentOptionsLocked[currentIndex]) {
         currentOptions = currentOptionsLocked[currentIndex];
     } else {
         currentOptions = generateOptionsForQuestion(question, fullData, currentMode, currentSubMode);
-        currentOptionsLocked[currentIndex] = [...currentOptions]; // simpan opsi tetap
+        currentOptionsLocked[currentIndex] = [...currentOptions];
     }
     
     const { main, sub } = getQuestionText(question, currentMode, currentSubMode);
