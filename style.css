@@ -5,123 +5,191 @@
 }
 
 body {
-    font-family: 'Segoe UI', 'Inter', system-ui, sans-serif;
-    background: linear-gradient(145deg, #0b1120 0%, #0a0f1a 100%);
+    font-family: 'Poppins', 'Segoe UI', system-ui, sans-serif;
+    background: linear-gradient(145deg, #0f172a 0%, #0a0f1a 100%);
     min-height: 100vh;
     color: #f1f5f9;
-    padding: 20px;
+    padding: 24px;
 }
 
 .container {
-    max-width: 700px;
+    max-width: 800px;
     margin: 0 auto;
 }
 
-/* Home Menu */
-.home-menu {
+/* ========== HOME PAGE ========== */
+.home-title {
     text-align: center;
-    padding: 2rem 1rem;
-}
-
-.title {
     font-size: 2.5rem;
     background: linear-gradient(135deg, #ffe6b0, #ffb347);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    margin-bottom: 0.5rem;
+    margin-bottom: 8px;
 }
 
-.subtitle {
+.home-sub {
+    text-align: center;
     opacity: 0.7;
-    margin-bottom: 2rem;
+    margin-bottom: 48px;
+    font-size: 0.9rem;
 }
 
-.mode-buttons {
+.mode-row {
     display: flex;
-    justify-content: center;
-    gap: 1rem;
+    gap: 24px;
+    margin-bottom: 32px;
     flex-wrap: wrap;
-    margin: 2rem 0;
 }
 
-.mode-btn {
-    background: rgba(30, 41, 59, 0.8);
-    border: 1px solid rgba(245, 158, 11, 0.4);
-    padding: 0.8rem 1.8rem;
-    border-radius: 60px;
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #facc15;
+.mode-card {
+    flex: 1;
+    background: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(10px);
+    border-radius: 32px;
+    padding: 28px 20px;
+    text-align: center;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
-.mode-btn:hover {
+.mode-card:hover {
+    transform: translateY(-6px);
+    background: rgba(245, 158, 11, 0.15);
+    border-color: #f59e0b;
+}
+
+.mode-icon {
+    font-size: 3rem;
+    margin-bottom: 12px;
+}
+
+.mode-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.mode-desc {
+    font-size: 0.8rem;
+    opacity: 0.6;
+}
+
+.kotoba-menu {
+    margin-top: 16px;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.kotoba-sub-btn {
+    background: #1e293b;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 40px;
+    color: #facc15;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.1s;
+    font-size: 0.8rem;
+}
+
+.kotoba-sub-btn:hover {
     background: #f59e0b;
     color: #0f1724;
-    transform: scale(1.02);
 }
 
-/* Quiz Card */
-.quiz-card {
+/* ========== QUIZ PAGE ========== */
+.quiz-container {
     background: rgba(15, 23, 42, 0.8);
     backdrop-filter: blur(12px);
     border-radius: 48px;
-    padding: 2rem 1.5rem;
-    border: 1px solid rgba(245, 158, 11, 0.2);
+    padding: 28px 24px;
+    border: 1px solid rgba(245, 158, 11, 0.25);
 }
 
 .quiz-header {
     display: flex;
     justify-content: space-between;
     background: #0f172a;
-    padding: 0.7rem 1.3rem;
+    padding: 12px 20px;
     border-radius: 60px;
-    margin-bottom: 2rem;
+    margin-bottom: 32px;
     font-weight: 600;
+    font-size: 0.9rem;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
-.question {
-    font-size: 5rem;
+.badge-mode {
+    background: #f59e0b20;
+    padding: 4px 16px;
+    border-radius: 40px;
+    color: #fbbf24;
+}
+
+.question-box {
     text-align: center;
+    margin: 32px 0;
+}
+
+.question-jp {
+    font-size: 4rem;
     font-weight: 800;
     font-family: 'Noto Sans JP', monospace;
     background: linear-gradient(135deg, #fff4e0, #ffdd99);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    margin: 1rem 0;
-    letter-spacing: 8px;
+    letter-spacing: 4px;
+}
+
+.question-sub {
+    font-size: 1rem;
+    opacity: 0.6;
+    margin-top: 8px;
 }
 
 .options {
     display: flex;
     flex-direction: column;
-    gap: 0.8rem;
-    margin: 1.5rem 0;
+    gap: 12px;
+    margin: 24px 0;
 }
 
 .option-btn {
     background: #1e293b;
     border: 2px solid #334155;
-    padding: 1rem 1.5rem;
+    padding: 14px 20px;
     border-radius: 60px;
-    font-size: 1.1rem;
-    font-weight: 600;
+    font-size: 1rem;
+    font-weight: 500;
     text-align: left;
     cursor: pointer;
-    transition: all 0.15s;
+    transition: 0.1s;
     color: #e2e8f0;
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 12px;
 }
 
 .option-btn:hover:not(:disabled) {
     background: #2d3a52;
     border-color: #f59e0b;
     transform: translateX(6px);
+}
+
+.option-prefix {
+    background: #f59e0b;
+    color: #0f172a;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 60px;
+    font-weight: 800;
 }
 
 .option-btn.correct {
@@ -136,64 +204,65 @@ body {
 }
 
 .option-btn:disabled {
-    opacity: 0.7;
+    opacity: 0.6;
     cursor: not-allowed;
-}
-
-.prefix {
-    background: #f59e0b;
-    color: #0f172a;
-    width: 38px;
-    height: 38px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 60px;
-    font-weight: 800;
 }
 
 .feedback {
     text-align: center;
-    padding: 0.8rem;
+    padding: 12px;
     border-radius: 60px;
-    margin: 1rem 0;
+    margin: 16px 0;
     font-weight: 500;
 }
 
 .next-btn {
     background: linear-gradient(95deg, #f59e0b, #d97706);
     width: 100%;
-    padding: 0.9rem;
+    padding: 14px;
     border: none;
     border-radius: 60px;
     font-weight: bold;
-    font-size: 1.1rem;
+    font-size: 1rem;
     color: #0c0a2a;
     cursor: pointer;
-    margin-top: 0.5rem;
+    margin-top: 8px;
 }
 
-.reset-btn {
+.secondary-btn {
     background: #334155;
-    margin-top: 0.8rem;
+    margin-top: 12px;
     color: #facc15;
 }
 
-.back-btn {
+.back-home {
     background: #1e293b;
-    margin-bottom: 1rem;
     color: #94a3b8;
+    margin-top: 12px;
 }
 
 .loading {
     text-align: center;
-    padding: 4rem;
+    padding: 60px 20px;
 }
 
-.error {
+.result-box {
     text-align: center;
-    padding: 2rem;
-    color: #f87171;
+    padding: 20px;
+}
+
+.result-score {
+    font-size: 3.5rem;
+    font-weight: 800;
+    margin: 24px 0;
+    color: #fbbf24;
+}
+
+.btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 24px;
 }
 
 .hidden {
