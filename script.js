@@ -60,7 +60,7 @@ function renderHome() {
             <div class="mode-row">
                 <div class="mode-card" data-mode="katabenda">
                     <div class="mode-icon">📚</div>
-                    <div class="mode-title">Katabenda</div>
+                    <div class="mode-title">Kotoba Kata Benda</div>
                     <div class="mode-desc">Kosakata bahasa Jepang</div>
                     <div class="kotoba-menu" id="katabendaMenu">
                         <button class="kotoba-sub-btn" data-sub="arti">🇮🇩 Tebak Arti</button>
@@ -70,7 +70,7 @@ function renderHome() {
                 </div>
                 <div class="mode-card" data-mode="kanjin5">
                     <div class="mode-icon">🈳</div>
-                    <div class="mode-title">Kanjin5</div>
+                    <div class="mode-title">Kanji N5</div>
                     <div class="mode-desc">Belajar Kanji dasar</div>
                     <div class="kotoba-menu" id="kanjin5Menu">
                         <button class="kotoba-sub-btn" data-sub="arti">🇮🇩 Tebak Arti</button>
