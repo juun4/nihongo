@@ -55,26 +55,25 @@ function renderHome() {
                 </div>
             </div>
             
-            <div class="mode-row">
-                <div class="mode-card" data-mode="katabenda">
-                    <div class="mode-icon">📚</div>
-                    <div class="mode-title">Kotoba Kata Benda</div>
-                    <div class="mode-desc">Kosakata bahasa Jepang</div>
-                    <div class="kotoba-menu" id="katabendaMenu">
-                        <button class="kotoba-sub-btn" data-sub="arti">🇮🇩 Tebak Arti</button>
-                        <button class="kotoba-sub-btn" data-sub="baca">🔊 Tebak Cara Baca</button>
-                        <button class="kotoba-sub-btn" data-sub="jepang">🇯🇵 Tebak Jepang</button>
-                    </div>
+            <div class="mode-card-full" data-mode="katabenda">
+                <div class="mode-icon">📚</div>
+                <div class="mode-title">Kotoba Kata Benda</div>
+                <div class="mode-desc">Kosakata bahasa Jepang</div>
+                <div class="kotoba-menu" id="katabendaMenu">
+                    <button class="kotoba-sub-btn" data-sub="arti">🇮🇩 Tebak Arti</button>
+                    <button class="kotoba-sub-btn" data-sub="baca">🔊 Tebak Cara Baca</button>
+                    <button class="kotoba-sub-btn" data-sub="jepang">🇯🇵 Tebak Jepang</button>
                 </div>
-                <div class="mode-card" data-mode="kanjin5">
-                    <div class="mode-icon">🈳</div>
-                    <div class="mode-title">Kanji N5</div>
-                    <div class="mode-desc">Belajar Kanji dasar</div>
-                    <div class="kotoba-menu" id="kanjin5Menu">
-                        <button class="kotoba-sub-btn" data-sub="arti">🇮🇩 Tebak Arti</button>
-                        <button class="kotoba-sub-btn" data-sub="baca">🔊 Tebak Bacaan</button>
-                        <button class="kotoba-sub-btn" data-sub="jepang">🇯🇵 Tebak Kanji</button>
-                    </div>
+            </div>
+            
+            <div class="mode-card-full" data-mode="kanjin5">
+                <div class="mode-icon">🈳</div>
+                <div class="mode-title">Kanji N5</div>
+                <div class="mode-desc">Belajar Kanji dasar</div>
+                <div class="kotoba-menu" id="kanjin5Menu">
+                    <button class="kotoba-sub-btn" data-sub="arti">🇮🇩 Tebak Arti</button>
+                    <button class="kotoba-sub-btn" data-sub="baca">🔊 Tebak Bacaan</button>
+                    <button class="kotoba-sub-btn" data-sub="jepang">🇯🇵 Tebak Kanji</button>
                 </div>
             </div>
             
@@ -99,12 +98,19 @@ function renderHome() {
 
     document.querySelectorAll('.mode-card[data-mode]').forEach(card => {
         const mode = card.getAttribute('data-mode');
-        if (mode === 'katabenda' || mode === 'kanjin5') return;
         card.addEventListener('click', () => {
             startQuiz(mode, null);
         });
     });
 
+    const kotobaCard = document.querySelector('.mode-card-full[data-mode="katabenda"]');
+    if (kotobaCard) {
+        kotobaCard.addEventListener('click', (e) => {
+            if (e.target.closest('.kotoba-sub-btn')) return;
+            startQuiz('katabenda', 'arti');
+        });
+    }
+    
     document.querySelectorAll('#katabendaMenu .kotoba-sub-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -112,6 +118,14 @@ function renderHome() {
         });
     });
 
+    const kanjiCard = document.querySelector('.mode-card-full[data-mode="kanjin5"]');
+    if (kanjiCard) {
+        kanjiCard.addEventListener('click', (e) => {
+            if (e.target.closest('.kotoba-sub-btn')) return;
+            startQuiz('kanjin5', 'arti');
+        });
+    }
+    
     document.querySelectorAll('#kanjin5Menu .kotoba-sub-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -336,7 +350,7 @@ function renderQuiz() {
 function renderResult() {
     const maxScore = sessionQuestions.length * POIN_PER_SOAL;
     const percentage = (score / maxScore) * 100;
-    let message = percentage >= 80 ? '🎉 Hebat!' : percentage >= 60 ? '👍 Bagus!' : percentage >= 40 ? '📚 Lumayan' : '💪 Coba lagi!';
+    let message = percentage >= 80 ? '🎉 Hebat! Penguasaanmu luar biasa!' : percentage >= 60 ? '👍 Bagus! Terus belajar ya!' : percentage >= 40 ? '📚 Lumayan, tapi perlu lebih banyak latihan.' : '💪 Jangan menyerah! Coba lagi!';
     
     const app = document.getElementById('app');
     app.innerHTML = `
